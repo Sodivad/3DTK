@@ -1,5 +1,5 @@
 @echo off
-:: this script is to build 3dtk on 64bit windows with visual studio 2015
+:: this script is to build 3dtk on 64bit windows with visual studio 2017
 :: if you require support for 32bit windows, please send patches
 :: this was tested on Windows 10 64bit
 
