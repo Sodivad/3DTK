@@ -158,6 +158,7 @@ option(WITH_COMPACT_OCTREE "Whether to use the compact octree display ON/OFF" OF
 option(WITH_GLEE "Whether to use OpenGL extensions, requires glee. ON/OFF" OFF)
 option(WITH_LASLIB "Whether to build LASlib based scanio library" ON)
 option(WITH_MESH "Whether to build mesh module that contains surface reconstruction" ON)
+option(WITH_APRILTAG "Compile with apriltag" ON)
 
 ## CUDA accelerated collision detection
 option(WITH_CUDA "Whether to build CUDA accelerated collision detection tools" OFF)
@@ -384,7 +385,9 @@ endif()
 # 3rdparty must come before src/calibration because it sets
 # APRILTAG_INCLUDE_DIRS
 add_subdirectory(3rdparty)
-add_subdirectory(src/calibration)
+if (WITH_APRILTAG)
+  add_subdirectory(src/calibration)
+endif()
 add_subdirectory(bindings)
 if(WITH_ADDONS)
   message(STATUS "With 3dtk addons.")

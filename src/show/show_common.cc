@@ -1100,6 +1100,7 @@ void signal_interrupt(int v)
   exitFunc(-1);
 }
 
+/*
 void setSignalHandling()
 {
   struct sigaction actSigSegv;
@@ -1123,6 +1124,7 @@ void setSignalHandling()
   sigaction(SIGINT, &actSigInt, NULL);
   sigaction(SIGTERM, &actSigInt, NULL);
 }
+*/
 
 void QuatToMouseRot(Quaternion q, double& x, double& y, double& z)
 {

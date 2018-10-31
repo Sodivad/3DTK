@@ -1,6 +1,7 @@
+@echo off
 :: this script is to build 3dtk on 64bit windows with visual studio 2015
 :: if you require support for 32bit windows, please send patches
-:: this was tested on Windos 10 64bit
+:: this was tested on Windows 10 64bit
 
 :: To run CL.exe manually from a terminal, you must first setup your
 :: environment using a call to
@@ -50,8 +51,6 @@ if not exist %outdir% (
 	exit /B 1
 )
 
-@echo on
-
 :: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
 :: with https://github.com/Microsoft/vcpkg/pull/2962
 vcpkg --triplet x64-windows install ^
@@ -76,19 +75,22 @@ if %ERRORLEVEL% GEQ 1 (
 setlocal
 :: need /d if %outdir% is a different drive letter than the current working
 :: directory
+
 cd /d %outdir%
 cmake ^
-	-G "Visual Studio 14 2015 Win64" ^
+	-G "Visual Studio 15 2017 Win64" ^
 	-DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-	-DCXSPARSE_INCLUDE_DIR=c:/tools/vcpkg/installed/x64-windows/include/suitesparse ^
-	-DwxWidgets_LIB_DIR=c:/tools/vcpkg/installed/x64-windows/lib ^
-	-DwxWidgets_INCLUDE_DIRS=c:/tools/vcpkg/installed/x64-windows/include ^
 	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
 	-DWITH_GLFW=OFF ^
 	-DWITH_XMLRPC=OFF ^
 	-DWITH_LIBCONFIG=OFF ^
 	-DWITH_FTGL=OFF ^
 	-DWITH_CGAL=OFF ^
+	-DWITH_ROS=OFF ^
+	-DWITH_LIBZIP=OFF ^
+	-DWITH_PYTHON=OFF ^
+	-DWITH_APRILTAG=OFF ^
+	-DWITH_LASLIB=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
