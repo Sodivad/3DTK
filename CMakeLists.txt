@@ -79,7 +79,7 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
-find_package(CXSparse REQUIRED)
+# find_package(CXSparse REQUIRED)
 
 find_package(ANN)
 if (ANN_FOUND)

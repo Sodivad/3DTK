@@ -5,7 +5,7 @@
 
 :: To run CL.exe manually from a terminal, you must first setup your
 :: environment using a call to
-:: C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat
+:: C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/vcvarsall.bat
 
 :: the path where the 3dtk sources are
 set sourcedir=%~1
@@ -79,18 +79,20 @@ setlocal
 cd /d %outdir%
 cmake ^
 	-G "Visual Studio 15 2017 Win64" ^
-	-DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-	-DOUTPUT_DIRECTORY:PATH=%outdir% ^
-	-DWITH_GLFW=OFF ^
-	-DWITH_XMLRPC=OFF ^
-	-DWITH_LIBCONFIG=OFF ^
-	-DWITH_FTGL=OFF ^
-	-DWITH_CGAL=OFF ^
-	-DWITH_ROS=OFF ^
-	-DWITH_LIBZIP=OFF ^
-	-DWITH_PYTHON=OFF ^
-	-DWITH_APRILTAG=OFF ^
-	-DWITH_LASLIB=OFF ^
+	-D CXSPARSE_INCLUDE_DIR=C:/tools/vcpkg/packages/suitesparse_x64-windows/include/suitesparse ^
+	-D CMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
+	-D WITH_GLFW=OFF ^
+	-D WITH_XMLRPC=OFF ^
+	-D WITH_LIBCONFIG=OFF ^
+	-D WITH_FTGL=OFF ^
+	-D WITH_CGAL=OFF ^
+	-D WITH_ROS=OFF ^
+	-D WITH_LIBZIP=OFF ^
+	-D WITH_PYTHON=OFF ^
+	-D WITH_APRILTAG=OFF ^
+	-D WITH_LASLIB=OFF ^
+	-D WITH_WXWIDGETS=OFF ^
 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
