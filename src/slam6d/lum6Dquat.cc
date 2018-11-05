@@ -21,7 +21,11 @@
 #endif
 
 #include "slam6d/lum6Dquat.h"
+#ifdef _MSC_VER
+#include "suitesparse/cs.h"
+#else
 #include <cs.h>
+#endif // _MSC_VER
 
 #include <cfloat>
 #include <fstream>
