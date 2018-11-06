@@ -24,11 +24,7 @@
 
 #include "slam6d/ghelix6DQ2.h"
 #include "slam6d/icp6Dhelix.h"
-#ifdef _MSC_VER
-#include "suitesparse/cs.h"
-#else
 #include <cs.h>
-#endif // _MSC_VER
 
 #include <cfloat>
 #include <fstream>

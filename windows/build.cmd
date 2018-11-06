@@ -53,7 +53,7 @@ if not exist %outdir% (
 
 :: FIXME: add cgal once appveyor installs a vcpkg version greater than 0.0.105
 :: with https://github.com/Microsoft/vcpkg/pull/2962
-vcpkg --triplet x64-windows install ^
+vcpkg --triplet x64-windows-vs2015 install ^
 	qt5 ^
 	libpng ^
 	boost ^
@@ -78,18 +78,25 @@ setlocal
 
 cd /d %outdir%
 cmake ^
-	-G "Visual Studio 15 2017 Win64" ^
-	-D CXSPARSE_INCLUDE_DIR=C:/tools/vcpkg/packages/suitesparse_x64-windows/include/suitesparse ^
+	-G "Visual Studio 14 2015 Win64" ^
 	-D CMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
-	-D WITH_LIBCONFIG=OFF ^
-	-D WITH_CGAL=OFF ^
-	-D WITH_LIBZIP=OFF ^
-	-D WITH_PYTHON=OFF ^
-	-D WITH_APRILTAG=OFF ^
-	-D WITH_LASLIB=OFF ^
-	-D WITH_WXWIDGETS=OFF ^
 	%sourcedir%
+
+REM cmake ^
+REM 	-G "Visual Studio 14 2015 Win64" ^
+REM 	-D CXSPARSE_INCLUDE_DIR=C:/tools/vcpkg/packages/suitesparse_x64-windows/include/suitesparse ^
+REM 	-D CXSPARSE_LIBRARIES=C:/tools/vcpkg/packages/suitesparse_x64-windows/lib/libcxsparse.lib ^
+REM 	-D CMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+REM 	-D OUTPUT_DIRECTORY:PATH=%outdir% ^
+REM 	-D WITH_LIBCONFIG=OFF ^
+REM 	-D WITH_CGAL=OFF ^
+REM 	-D WITH_LIBZIP=OFF ^
+REM 	-D WITH_PYTHON=OFF ^
+REM 	-D WITH_APRILTAG=OFF ^
+REM 	-D WITH_LASLIB=OFF ^
+REM 	-D WITH_WXWIDGETS=OFF ^
+REM 	%sourcedir%
 
 if %ERRORLEVEL% GEQ 1 (
 	echo cmake config failed

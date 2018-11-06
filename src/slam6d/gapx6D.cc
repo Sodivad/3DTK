@@ -23,11 +23,7 @@
 
 #include "slam6d/gapx6D.h"
 #include "slam6d/icp6Dapx.h"
-#ifdef _MSC_VER
-#include "suitesparse/cs.h"
-#else
 #include <cs.h>
-#endif // _MSC_VER
 
 #include <cfloat>
 #include <fstream>
