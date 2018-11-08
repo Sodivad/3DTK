@@ -1,3 +1,4 @@
+@echo off
 :: this script is to build 3dtk on 64bit windows with visual studio 2013
 :: if you require support for 32bit windows, please send patches
 :: this was tested on Windos 7 64bit
@@ -10,10 +11,10 @@
 :: script:
 
 :: the path where the 3dtk sources are
-set sourcedir=Z:/3dtk/
+set sourcedir=..
 
 :: the path where you want the resulting binaries
-set outdir=C:/slam6d/
+set outdir=../build
 
 :: the build type (one of Debug, Release, RelWithDebInfo and MinSizeRel)
 set buildtype=Release
@@ -213,6 +214,7 @@ goto:eof
 
 :download
 	powershell -command ^
+		"[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;" ^
 		"$wc = New-Object System.Net.WebClient;" ^
 		"$wc.DownloadFile(""""%~1""", ^
 			"""%~2"""")";
