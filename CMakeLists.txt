@@ -1,6 +1,12 @@
 cmake_minimum_required (VERSION 2.8.2)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 project (3DTK)
+if(POLICY CMP0025)
+  #necessary to build with custom clang on macOS
+  cmake_policy(SET CMP0025 NEW)
+endif()
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+include(OptionalBuild3DTK)
 
 # cmake no longer defines WIN32 on cygwin
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
@@ -13,7 +19,7 @@ set (CMAKE_BUILD_TYPE "" CACHE INTERNAL "" FORCE)
 # (the source directory) is important for platforms like windows, where the
 # produced binaries cannot be run if being placed in certain locations (like on
 # a network drive)
-set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}" CACHE PATH "The directory where the output will be placed into lib, obj and bin subdirectories (default: ${CMAKE_SOURCE_DIR})" )
+set(OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}" CACHE PATH "The directory where the output will be placed into lib, obj and bin subdirectories (default: ${PROJECT_SOURCE_DIR})" )
 
 # Set output directories for libraries and executables
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/lib )
@@ -49,7 +55,11 @@ if(Boost_FOUND)
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 
-if(NOT WIN32 AND NOT APPLE)
+if(NOT WIN32)
+  find_package(CXSparse REQUIRED)
+  link_directories(${CXSPARSE_LIBRARY_DIR})
+  include_directories(${CXSPARSE_INCLUDE_DIRS})
+
   find_package(LibZip REQUIRED)
   if(${LIBZIP_VERSION} VERSION_LESS 0.11.2)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLIBZIP_OLD")
@@ -57,11 +67,21 @@ if(NOT WIN32 AND NOT APPLE)
   if (NOT CYGWIN)
     find_package(ANN REQUIRED)
   endif()
+  if(APPLE)
+    include_directories("${LIBZIP_INCLUDE_DIR_ZIPCONF}")
+  endif()
 endif()
 
-if(APPLE)
-  find_package(LibZip REQUIRED)
-  include_directories("${LIBZIP_INCLUDE_DIR_ZIPCONF}")
+if(WIN32 OR CYGWIN)
+  set(ANN_LIBRARIES ann)
+endif()
+
+# The newmat package is optional and will be compiled from 3rdparty if it
+# wasn't found. We don't use an operating system specific switch because
+# there are some Linux distributions (like Fedora) that do not ship newmat.
+find_package(Newmat)
+if(NOT ${NEWMAT_FOUND})
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/newmat-10)
 endif()
 
 if(APPLE)
@@ -93,73 +113,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_OPENCV_FLAGS}")
 # Declare Options and modify build accordingly ##
 #################################################
 
-
-function(ENFORCE_OPTION_DEP_3DTK option VALUE)
-  set (${option} "${VALUE}" CACHE BOOL "${${option}_DESCRIPTION}" FORCE) # this option set to VALUE as advised
-
-  #now make sure other dependencies are also true
-  foreach(d ${${option}_DEPENDENCIES}) # look through all my dependencies
-    string(REGEX REPLACE " +" ";" CMAKE_DEPENDENT_OPTION_DEP "${d}")
-
-    # check for a not in front
-    string(STRIP "${CMAKE_DEPENDENT_OPTION_DEP}" CMAKE_DEPENDENT_OPTION_DEP)
-    string(SUBSTRING "${CMAKE_DEPENDENT_OPTION_DEP}" 0 3 CMAKE_DEPENDENT_OPTION_DEP_3)
-    string(TOUPPER "${CMAKE_DEPENDENT_OPTION_DEP_3}" CMAKE_DEPENDENT_OPTION_DEP_3)
-    string(COMPARE EQUAL "${CMAKE_DEPENDENT_OPTION_DEP_3}" "NOT" CMAKE_DEPENDENT_OPTION_DEP_NOT)
-    #string(REPLACE "NOT " "" CMAKE_DEPENDENT_OPTION_DEP "${d}")
-    if(CMAKE_DEPENDENT_OPTION_DEP_NOT) # we found a NOT
-      string(REPLACE "NOT;" "" CMAKE_DEPENDENT_OPTION_DEP "${CMAKE_DEPENDENT_OPTION_DEP}")
-      if(${CMAKE_DEPENDENT_OPTION_DEP})  # not met, make sure it is
-        ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} OFF)
-      else() # dependency is met
-      endif()
-    else()
-      if(${CMAKE_DEPENDENT_OPTION_DEP})  # dependency is met
-      else() # not met, make sure it is
-        ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} ON)
-      endif()
-    endif()
-  endforeach()
-
-endfunction()
-
-macro(OPT_DEP option doc default depends)
-  option(${option} "${doc}" "${default}")
-  set(${option} "${${option}}" CACHE BOOL "${doc}" FORCE)
-  set(${option}_DEPENDENCIES "${depends}" CACHE INTERNAL "" FORCE)
-  set(${option}_DESCRIPTION "${doc}" CACHE INTERNAL "" FORCE)
-
-  if (${option})
-    #message(STATUS "Yes ${option} is true")
-    #  message("FOREACH d in ${depends}")
-
-    foreach(d ${depends})
-      string(REGEX REPLACE " +" ";" CMAKE_DEPENDENT_OPTION_DEP "${d}")
-
-      # check for a not in front
-      string(STRIP "${CMAKE_DEPENDENT_OPTION_DEP}" CMAKE_DEPENDENT_OPTION_DEP)
-      string(SUBSTRING "${CMAKE_DEPENDENT_OPTION_DEP}" 0 3 CMAKE_DEPENDENT_OPTION_DEP_3)
-      string(TOUPPER "${CMAKE_DEPENDENT_OPTION_DEP_3}" CMAKE_DEPENDENT_OPTION_DEP_3)
-      string(COMPARE EQUAL "${CMAKE_DEPENDENT_OPTION_DEP_3}" "NOT" CMAKE_DEPENDENT_OPTION_DEP_NOT)
-      if(CMAKE_DEPENDENT_OPTION_DEP_NOT) # we found a NOT
-        string(REPLACE "NOT;" "" CMAKE_DEPENDENT_OPTION_DEP "${CMAKE_DEPENDENT_OPTION_DEP}")
-        if(${CMAKE_DEPENDENT_OPTION_DEP})  # not met, make sure it is
-          ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} OFF)
-        else() # dependency is met
-        endif()
-      else()
-        if(${CMAKE_DEPENDENT_OPTION_DEP})  # dependency is met
-        else() # not met, make sure it is
-          ENFORCE_OPTION_DEP_3DTK(${CMAKE_DEPENDENT_OPTION_DEP} ON)
-        endif()
-      endif()
-    endforeach()
-
-  endif()
-endmacro()
-
-
-
 ## FreeGLUT
 OPT_DEP(WITH_FREEGLUT "Whether freeglut is available. This enables iterative drawing in show. ON/OFF" ON "")
 
@@ -168,6 +121,7 @@ OPT_DEP(WITH_SHOW "Whether to build Show. This is the Visualization program of s
 
 if(WITH_SHOW)
   message(STATUS "With show")
+  find_package(PNG REQUIRED)
 else()
   #  set (WITH_OCTREE_DISPLAY "ON" CACHE INTERNAL "" FORCE)
   message(STATUS "Without show")
@@ -178,6 +132,7 @@ OPT_DEP(WITH_WXSHOW "Whether to build WXShow. This is the wxwidgets variant of S
 
 if(WITH_WXSHOW)
   find_package(wxWidgets COMPONENTS core base gl REQUIRED)
+  find_package(PNG REQUIRED)
   # set wxWidgets_wxrc_EXECUTABLE to be ignored in the configuration
   set (wxWidgets_wxrc_EXECUTABLE " " CACHE INTERNAL "" FORCE)
   # wxWidgets include (this will do all the magic to configure everything)
@@ -187,11 +142,15 @@ else()
   message(STATUS "Without wxshow")
 endif()
 
+## QtShow
+OPT_DEP(WITH_QTSHOW "Whether to build QtShow. This is the Qt variant of Show. ON/OFF" OFF "")
+
 ## GLUT and OpenGL
 
-if(WITH_FREEGLUT OR WITH_SHOW OR WITH_WXSHOW)
+if(WITH_FREEGLUT OR WITH_SHOW OR WITH_WXSHOW OR WITH_QTSHOW)
   find_package(OpenGL REQUIRED)
   find_package(GLUT REQUIRED)
+  find_package(PNG REQUIRED)
   include_directories(${GLUT_INCLUDE_DIR})
 endif()
 
@@ -224,8 +183,8 @@ endif()
 OPT_DEP(WITH_THERMO "Whether to build executables for mutual calibration of laser scanner and camera. ON/OFF" OFF "WITH_SHAPE_DETECTION")
 if(WITH_THERMO)
   add_subdirectory(3rdparty/cvblob)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
-  link_directories(${CMAKE_SOURCE_DIR}/3rdparty/cvblob)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
+  link_directories(${PROJECT_SOURCE_DIR}/3rdparty/cvblob)
   message(STATUS "With thermo")
 else()
   message(STATUS "Without thermo")
@@ -359,7 +318,7 @@ OPT_DEP(WITH_RIVLIB "Whether the RIEGL rivlib is present ON/OFF" OFF "")
 if(WITH_RIVLIB)
   message(STATUS "Compiling a scan IO for RXP files")
 
-  set(RIEGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/riegl/)
+  set(RIEGL_DIR ${PROJECT_SOURCE_DIR}/3rdparty/riegl/)
 
   if(UNIX)
     set(RiVLib_USE_STATIC_RUNTIME ON)
@@ -380,7 +339,7 @@ if(WITH_RIVLIB)
     find_package(LibXml2 REQUIRED)
     include_directories(${LIBXML2_INCLUDE_DIR})
 
-    include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
+    include_directories(${PROJECT_SOURCE_DIR}/3rdparty)
     if(WIN32)
       set(RiVLib_SCANLIB_LIBRARY ${RIEGL_DIR}libscanlib-mt.lib ${RIEGL_DIR}libctrllib-mt.lib ${RIEGL_DIR}libboost_system-mt-1_43_0-vns.lib ${LIBXML2_LIBRARIES})
     else()
@@ -389,6 +348,17 @@ if(WITH_RIVLIB)
   endif()
 else()
   message(STATUS "Do NOT compile a scan IO for RXP")
+endif()
+
+## B3D
+OPT_DEP(WITH_B3D "Whether the B3D file format is supported. ON/OFF" OFF "")
+
+if(WITH_B3D)
+  add_definitions(-DWITH_B3D)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/b3dfile)
+  message(STATUS "Compiling a scan IO for B3D files")
+else()
+  message(STATUS "Do NOT compile a scan IO for B3D files")
 endif()
 
 ## PMD
@@ -413,8 +383,12 @@ endif()
 # OPEN
 find_package(OpenMP)
 if(OPENMP_FOUND)
+  message(STATUS "fount OpenMP")
   OPT_DEP(WITH_OPENMP "Whether to use parallel processing capabilities of OPENMP. ON/OFF" ON "")
+else()
+  message(STATUS "can't found OpenMP")
 endif()
+
 
 OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW;WITH_FBR")
 #OPT_DEP(EXPORT_SHARED_LIBS "Whether to build additional shared libraries for use in other projects. ON/OFF" OFF "WITH_SHOW")
@@ -432,7 +406,7 @@ if(EXPORT_SHARED_LIBS)
   elseif(CYGWIN)
     target_link_libraries(slam scan_s ANN_s cxsparse newmat_s show_s fbr_s)
   else()
-    target_link_libraries(slam scan_s ann cxsparse newmat show_s fbr_s)
+    target_link_libraries(slam scan_s ${ANN_LIBRARIES} cxsparse newmat show_s fbr_s)
   endif()
   message(STATUS "exporting additional libraries")
 else()
@@ -446,7 +420,7 @@ OPT_DEP(WITH_ADDONS "Whether to download and use addons to 3DTK. ON/OFF" OFF "")
 if(WITH_ADDONS)
   message(STATUS "Compiling addons directory")
   #execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/slam6dprivate/trunk/addons addons
-  #                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   #                OUTPUT_QUIET
   #                )
   message(STATUS "With addons.")
@@ -454,12 +428,8 @@ else()
   message(STATUS "Without addons.")
 endif()
 
-OPT_DEP(WITH_TESTING "Whether to download and use testing data to 3DTK. ON/OFF" OFF "")
+OPT_DEP(WITH_TESTING "Whether to build the test framework. ON/OFF" ON "")
 if(WITH_TESTING)
-  execute_process(COMMAND svn co https://robotik.informatik.uni-wuerzburg.de/testing testing
-          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-          OUTPUT_QUIET
-          )
   message(STATUS "With testing.")
 else()
   message(STATUS "Without testing.")
@@ -514,39 +484,34 @@ endif()
 
 
 # 3rdparty
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/b3dfile)
-# include newmat for Mac
 if(APPLE)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
 endif()
 
 if(WIN32)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/zlib/)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
-  link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/zlib/)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/libzip-1.0.1/lib/)
+  link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/lib/x64/)
+    link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/lib/x64/)
   else ()
-    link_directories(${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/lib/)
+    link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/lib/)
   endif ()
-  add_library(XGetopt STATIC ${CMAKE_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
+  add_library(XGetopt STATIC ${PROJECT_SOURCE_DIR}/3rdparty/windows/XGetopt.cpp)
   set(CMAKE_STATIC_LIBRARY_SUFFIX "32.lib")
   # to be able to use numeric_limits<int>::max() and friends on windows
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
 elseif(CYGWIN)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
-  include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/ann_1.1.1_modified/include)
 else()
   # Add include path for OpenGL without GL/-prefix
   # to avoid the include incompatibility between MACOS
   # and linux
-  find_path(OPENGL_INC gl.h /usr/include/GL)
+  find_path(OPENGL_INC NAMES gl.h GL/gl.h PATHS /usr/include/GL)
   include_directories(${OPENGL_INC})
 endif()
 
@@ -573,28 +538,36 @@ endif()
 # hack to "circumvent" Debug and Release folders that are created under visual studio
 # this is why the INSTALL target has to be used in visual studio
 if(MSVC)
-  install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release/ CONFIGURATIONS Release DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Release DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   else()
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Release DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
 
-  install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/x64/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   else()
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${CMAKE_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/3rdparty/windows/ CONFIGURATIONS Debug DESTINATION ${PROJECT_SOURCE_DIR}/windows FILES_MATCHING PATTERN "*.dll" PATTERN "*.exe")
   endif()
 
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    file(COPY ${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/bin/x64/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
+    file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/bin/x64/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
   else()
-    file(COPY ${CMAKE_SOURCE_DIR}/3rdparty/windows/freeglut/bin/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
+    file(COPY ${PROJECT_SOURCE_DIR}/3rdparty/windows/freeglut/bin/freeglut.dll DESTINATION ${OUTPUT_DIRECTORY}/bin)
   endif()
 endif()
 
+#################################################
+# Robot Operating System (ROS) Integration     ##
+#################################################
 
+if( catkin_FOUND )
+  catkin_package(
+    INCLUDE_DIRS include addons/include
+  )
+endif()
 
 #################################################
 # GENERAL PROJECT SETTINGS                     ##
@@ -602,15 +575,17 @@ endif()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CFLAGS}")
 
+if(APPLE)
+  set(CMAKE_MACOSX_RPATH 1)
+endif()
 
 # Set include and link dirs ...
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/glui-2.36/include/)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/wxthings/include/)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/newmat-10)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/rply-1.1.4)
-link_directories(${CMAKE_SOURCE_DIR}/obj)
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/include/)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/wxthings/include/)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/rply-1.1.4)
+link_directories(${PROJECT_SOURCE_DIR}/obj)
+link_directories(${PROJECT_SOURCE_DIR}/lib)
 
 add_subdirectory(src/slam6d)
 add_subdirectory(src/scanio)
@@ -619,6 +594,7 @@ add_subdirectory(src/segmentation)
 add_subdirectory(src/normals)
 add_subdirectory(src/veloslam)
 add_subdirectory(src/show)
+add_subdirectory(src/qtshow)
 add_subdirectory(src/grid)
 add_subdirectory(src/pmd)
 add_subdirectory(src/shapes)
@@ -629,21 +605,22 @@ add_subdirectory(src/scanner)
 add_subdirectory(src/model)
 add_subdirectory(src/collision)
 add_subdirectory(src/peopleremover)
+add_subdirectory(src/spherical_quadtree)
 add_subdirectory(src/cuda)
 add_subdirectory(src/calibration)
 add_subdirectory(src/ros)
+add_subdirectory(src/tools)
 add_subdirectory(3rdparty)
 add_subdirectory(bindings)
 if(WITH_ADDONS)
-  message(STATUS "With 3dtkaddons.")
+  message(STATUS "With 3dtk addons.")
   add_subdirectory(addons)
 endif()
 if(WITH_TESTING)
   message(STATUS "With 3dtk testing.")
   find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
   enable_testing()
-  add_subdirectory(testing/scanio)
-  add_subdirectory(testing/kdtree)
+  add_subdirectory(testing)
 endif()
 
 # Dummy target with all header files
