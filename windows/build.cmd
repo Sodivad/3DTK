@@ -11,10 +11,20 @@
 :: script:
 
 :: the path where the 3dtk sources are
-set sourcedir=..
+set sourcedir=%~1
+
+if "%sourcedir%" == "" (
+	echo "Usage: %0 sourcedir outdir"
+	exit /B 1
+)
 
 :: the path where you want the resulting binaries
-set outdir=../build
+set outdir=%~2
+
+if "%outdir%" == "" (
+	echo "Usage: %0 sourcedir outdir"
+	exit /B 1
+)
 
 :: the build type (one of Debug, Release, RelWithDebInfo and MinSizeRel)
 set buildtype=Release
