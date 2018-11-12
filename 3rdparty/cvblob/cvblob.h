@@ -44,6 +44,15 @@
 #include <opencv2/opencv.hpp>
 #endif
 
+// https://github.com/dyne/frei0r/pull/27/files
+#include <opencv2/core/version.hpp>
+#define CV_VERSION_NUM (CV_VERSION_MAJOR * 10000 \
+                      + CV_VERSION_MINOR * 100 \
+                      + CV_VERSION_REVISION)
+#if CV_VERSION_NUM > 30401
+#include <opencv2/imgproc.hpp>
+#endif
+
 #ifndef __CV_BEGIN__
 #define __CV_BEGIN__ __BEGIN__
 #endif
