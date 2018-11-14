@@ -264,6 +264,7 @@ endif()
 
 # 3rdparty
 if(WIN32)
+  include_directories(${PROJECT_SOURCE_DIR}/3rdparty/cxsparse-4.4.4/suitesparse/)
   include_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows/)
   link_directories(${PROJECT_SOURCE_DIR}/3rdparty/windows)
   link_directories(${BOOST_LIBRARYDIR})
