@@ -6,6 +6,8 @@ if(POLICY CMP0025)
 endif()
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/3rdparty/CMakeModules" ${CMAKE_MODULE_PATH})
 
+find_package(GLUT REQUIRED)
+
 # cmake no longer defines WIN32 on cygwin
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # remove when cmake >= 2.8.4 is required
 

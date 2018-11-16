@@ -42,29 +42,32 @@
   #include <windef.h>
 #endif
 
-#if defined(GLUI_FREEGLUT)
+#define FREEGLUT_STATIC
+#define _LIB
+#define FREEGLUT_LIB_PRAGMAS 0
+#include <GL/freeglut.h>
+
+// #if defined(GLUI_FREEGLUT)
 
   // FreeGLUT does not yet work perfectly with GLUI
   //  - use at your own risk.
+
+// #elif defined(GLUI_OPENGLUT)
+
+//   // OpenGLUT does not yet work properly with GLUI
+//   //  - use at your own risk.
   
-  #include <GL/freeglut.h>
+//   #include <GL/openglut.h>
 
-#elif defined(GLUI_OPENGLUT)
+// #else 
 
-  // OpenGLUT does not yet work properly with GLUI
-  //  - use at your own risk.
-  
-  #include <GL/openglut.h>
+//   #ifdef __APPLE__
+//   #include <GLUT/glut.h>
+//   #else
+//   #include <GL/glut.h>
+//   #endif
 
-#else 
-
-  #ifdef __APPLE__
-  #include <GLUT/glut.h>
-  #else
-  #include <GL/glut.h>
-  #endif
-
-#endif
+// #endif
 
 #include <cstdio>
 #include <cstring>

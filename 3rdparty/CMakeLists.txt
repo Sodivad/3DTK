@@ -1,4 +1,5 @@
 if (WITH_OPENGL AND NOT APPLE)
+  find_package(GLUT REQUIRED)
   # Compile glui library
   SET(GLUI_DIR ${PROJECT_SOURCE_DIR}/3rdparty/glui-2.36/)
   add_library(glui_objects OBJECT
@@ -44,12 +45,13 @@ if (WITH_OPENGL AND NOT APPLE)
   set_property(TARGET glui_objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
   add_library(glui_static STATIC $<TARGET_OBJECTS:glui_objects>)
-  add_library(glui_shared SHARED $<TARGET_OBJECTS:glui_objects>)
+  # add_library(glui_shared SHARED $<TARGET_OBJECTS:glui_objects>)
   if (WIN32)
-    target_link_libraries(glui_static freeglut)
+    target_link_libraries(glui_static ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
+    # target_link_libraries(glui_shared ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
   endif(WIN32)
   set_target_properties(glui_static PROPERTIES OUTPUT_NAME glui CLEAN_DIRECT_OUTPUT 1)
-  set_target_properties(glui_shared PROPERTIES OUTPUT_NAME glui CLEAN_DIRECT_OUTPUT 1)
+  # set_target_properties(glui_shared PROPERTIES OUTPUT_NAME glui CLEAN_DIRECT_OUTPUT 1)
 endif()
 
 # Compile wxthings library

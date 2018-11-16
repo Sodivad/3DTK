@@ -65,17 +65,17 @@ if not exist %sourcedir% (
 	exit /B 1
 )
 
-for %%p in (
-		%sourcedir%/3rdparty/windows/freeglut/lib/x64/freeglut.lib
-		%sourcedir%/3rdparty/windows/freeglut/include
-		%sourcedir%/3rdparty/windows/zlib.lib
-		%sourcedir%/3rdparty/windows/zlib
-	) do (
-		if not exist %%p (
-			echo %%p does not exist - does %sourcedir% really contain the 3DTK sources?
-			exit /B 1
-		)
-)
+REM for %%p in (
+REM 		%sourcedir%/3rdparty/windows/freeglut/lib/x64/freeglut.lib
+REM 		%sourcedir%/3rdparty/windows/freeglut/include
+REM 		%sourcedir%/3rdparty/windows/zlib.lib
+REM 		%sourcedir%/3rdparty/windows/zlib
+REM 	) do (
+REM 		if not exist %%p (
+REM 			echo %%p does not exist - does %sourcedir% really contain the 3DTK sources?
+REM 			exit /B 1
+REM 		)
+REM )
 
 if not exist %outdir% (
 	echo %outdir% does not exist. Make sure the outdir variable is set to an existing path.

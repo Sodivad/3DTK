@@ -1100,31 +1100,31 @@ void signal_interrupt(int v)
   exitFunc(-1);
 }
 
-/*
+
 void setSignalHandling()
 {
-  struct sigaction actSigSegv;
-  struct sigaction actSigInt;
-  sigset_t sigset;
+  // struct sigaction actSigSegv;
+  // struct sigaction actSigInt;
+  // sigset_t sigset;
 
-  sigemptyset(&sigset);
-  sigaddset(&sigset, SIGSEGV);
-  sigaddset(&sigset, SIGINT);
-  sigaddset(&sigset, SIGTERM);
+  // sigemptyset(&sigset);
+  // sigaddset(&sigset, SIGSEGV);
+  // sigaddset(&sigset, SIGINT);
+  // sigaddset(&sigset, SIGTERM);
 
-  memset(&actSigSegv, 0, sizeof(actSigSegv));
-  memset(&actSigSegv, 0, sizeof(actSigInt));
+  // memset(&actSigSegv, 0, sizeof(actSigSegv));
+  // memset(&actSigSegv, 0, sizeof(actSigInt));
 
-  actSigSegv.sa_handler = signal_segv;
-  actSigSegv.sa_mask = sigset;
-  sigaction(SIGSEGV, &actSigSegv, NULL);
+  // actSigSegv.sa_handler = signal_segv;
+  // actSigSegv.sa_mask = sigset;
+  // sigaction(SIGSEGV, &actSigSegv, NULL);
 
-  actSigInt.sa_handler = signal_interrupt;
-  actSigInt.sa_mask = sigset;
-  sigaction(SIGINT, &actSigInt, NULL);
-  sigaction(SIGTERM, &actSigInt, NULL);
+  // actSigInt.sa_handler = signal_interrupt;
+  // actSigInt.sa_mask = sigset;
+  // sigaction(SIGINT, &actSigInt, NULL);
+  // sigaction(SIGTERM, &actSigInt, NULL);
 }
-*/
+
 
 void QuatToMouseRot(Quaternion q, double& x, double& y, double& z)
 {

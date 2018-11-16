@@ -1,4 +1,4 @@
-if (WITH_OPENGL AND WITH_QT)
+if (0)
   find_package(Qt5Widgets)
   find_package(Qt5OpenGL)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -38,7 +38,7 @@ if (WITH_OPENGL AND WITH_QT)
   add_library(glwidget STATIC GLWidget.cc ${GLWIDGET_HEADERS_MOC})
 
   target_link_libraries(glwidget Qt5::Widgets Qt5::OpenGL)
-  target_link_libraries(glwidget show_shared ${SHOW_LIBS_SHARED} ${QT_LIBRARIES})
+  target_link_libraries(glwidget show_shared ${SHOW_LIBS_STATIC} ${QT_LIBRARIES})
 
   target_link_libraries(qtshow Qt5::Widgets)
   target_link_libraries(qtshow glwidget ${QT_LIBRARIES})

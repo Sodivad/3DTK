@@ -432,14 +432,14 @@ void DrawScala() {
 	glBlendFunc(GL_ONE, GL_ZERO);
 	glColor3f(1,1,1);
 	glRasterPos3f(textoffset              , yoffset + length - 4     , z);
-	_glutBitmapString(GLUT_BITMAP_8_BY_13 , ymaxtext);
+	// _glutBitmapString(GLUT_BITMAP_8_BY_13 , ymaxtext);
 	glRasterPos3f(textoffset              , yoffset + length/2.0 - 4 , z);
-	_glutBitmapString(GLUT_BITMAP_8_BY_13, yhalftext);
+	// _glutBitmapString(GLUT_BITMAP_8_BY_13, yhalftext);
 
 	for (int i = 1; i < 5; i++) {
 		double tick = (length / 5.0 ) * (double)i;
 		glRasterPos3f(textoffset              , yoffset + tick -4 , z);
-		_glutBitmapString(GLUT_BITMAP_8_BY_13 , yticktext[i-1]);
+		// _glutBitmapString(GLUT_BITMAP_8_BY_13 , yticktext[i-1]);
 	}
 
 

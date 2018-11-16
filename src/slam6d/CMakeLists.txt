@@ -13,13 +13,13 @@ include_directories(${ANN_INCLUDE_DIRS})
 
 ### SCAN_RED
 
-if (WITH_OPENCV)
+if (0)
   add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
   if(MSVC)
-    target_link_libraries(scan_red scan_shared show_shared ${ANN_LIBRARIES_STATIC} fbr_cv_io_shared fbr_panorama_shared ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(scan_red scan_static show_static ${ANN_LIBRARIES_STATIC} fbr_cv_io_static fbr_panorama_static ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_STATIC})
   else()
-    target_link_libraries(scan_red scan_shared show_shared ${ANN_LIBRARIES_SHARED} fbr_cv_io_shared fbr_panorama_shared ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_SHARED})
+    target_link_libraries(scan_red scan_shared show_shared ${ANN_LIBRARIES_SHARED} fbr_cv_io_static fbr_panorama_shared ${OpenCV_LIBS} ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${SHOW_LIBS_STATIC})
   endif()
 endif()
 

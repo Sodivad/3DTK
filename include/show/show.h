@@ -9,22 +9,25 @@
 #define __SHOW_H__
 
 
-#ifdef _MSC_VER
+// #ifdef _MSC_VER
 #define  _USE_MATH_DEFINES
 #include <windows.h>
-#endif
-#ifdef __CYGWIN__
-#include <windef.h>
-#endif
-#ifdef WITH_OPENGL
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
+#define FREEGLUT_STATIC
+#define _LIB
+#define FREEGLUT_LIB_PRAGMAS 0
 #include <GL/freeglut.h>
-#endif
-#else
-#include "show/dummygl.h"
-#endif
+// #endif
+// #ifdef __CYGWIN__
+// #include <windef.h>
+// #endif
+// #ifdef WITH_OPENGL
+// #ifdef __APPLE__
+// #include <GLUT/glut.h>
+// #else
+// #endif
+// #else
+// #include "show/dummygl.h"
+// #endif
 
 #include <string>
 #include <vector>

@@ -12,16 +12,21 @@
 #include <fstream>
 #include <iostream>
 
-#ifdef WITH_OPENGL
-#include <GL/glui.h>
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
+#define FREEGLUT_STATIC
+#define _LIB
+#define FREEGLUT_LIB_PRAGMAS 0
 #include <GL/freeglut.h>
-#endif
-#else
-#include "show/dummygl.h"
-#endif
+
+// #ifdef WITH_OPENGL
+// #include <GL/glui.h>
+// #ifdef __APPLE__
+// #include <GLUT/glut.h>
+// #else
+
+// #endif
+// #else
+// #include "show/dummygl.h"
+// #endif
 
 
 double SDisplay::mirror[16] = {1,0,0,0,
@@ -123,7 +128,7 @@ void PointDisplay::displayObject() {
   for(unsigned int i = 0; i < points.size(); i++) {
     
     glRasterPos3f(points[i][0], points[i][1], points[i][2]);
-    _glutBitmapString(GLUT_BITMAP_HELVETICA_10, labels[i].c_str());
+    // _glutBitmapString(GLUT_BITMAP_HELVETICA_10, labels[i].c_str());
     //_glutBitmapString(GLUT_BITMAP_9_BY_15, "http://threedtk.de");
    
   }
