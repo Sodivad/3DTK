@@ -1,4 +1,4 @@
-if (WITH_OPENCV)
+if (NOT MSVC AND WITH_OPENCV)
   find_package(OpenCV REQUIRED)
 
   set(FBR_LIBS scan_shared show_shared ${OpenCV_LIBS})

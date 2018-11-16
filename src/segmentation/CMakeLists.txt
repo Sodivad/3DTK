@@ -1,4 +1,4 @@
-if (WITH_OPENCV AND WITH_OPENMP)
+if (NOT MSVC AND WITH_OPENCV AND WITH_OPENMP)
   find_package(OpenCV REQUIRED)
 
   include_directories(${ANN_INCLUDE_DIRS})

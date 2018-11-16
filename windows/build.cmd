@@ -7,8 +7,8 @@
 :: environment using a call to
 :: C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/vcvarsall.bat
 
-:: you might want to configure the following variables before you run this
-:: script:
+:: Also make sure that you've installed vcpkg under C:\tools\vcpkg.
+:: If you haven't, you can just move it there.
 
 :: the path where the 3dtk sources are
 set sourcedir=%~1
@@ -63,18 +63,6 @@ set buildtype=Release
 if not exist %sourcedir% (
 	echo %sourcedir% does not exist. Make sure the sourcedir variable is set to the path of the 3DTK sources.
 	exit /B 1
-)
-
-for %%p in (
-		%sourcedir%/3rdparty/windows/freeglut/lib/x64/freeglut.lib
-		%sourcedir%/3rdparty/windows/freeglut/include
-		%sourcedir%/3rdparty/windows/zlib.lib
-		%sourcedir%/3rdparty/windows/zlib
-	) do (
-		if not exist %%p (
-			echo %%p does not exist - does %sourcedir% really contain the 3DTK sources?
-			exit /B 1
-		)
 )
 
 if not exist %outdir% (

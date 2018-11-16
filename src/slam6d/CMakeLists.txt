@@ -13,7 +13,7 @@ include_directories(${ANN_INCLUDE_DIRS})
 
 ### SCAN_RED
 
-if (WITH_OPENCV)
+if (NOT MSVC AND WITH_OPENCV)
   add_executable(scan_red scan_red.cc ../scanio/writer.cc fbr/fbr_global.cc fbr/panorama.cc fbr/scan_cv.cc)
 
   if(MSVC)

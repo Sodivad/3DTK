@@ -1,4 +1,4 @@
-if (WITH_OPENGL)
+if (NOT MSVC AND WITH_OPENGL)
   include_directories(${CXSPARSE_INCLUDE_DIRS})
   include_directories(${NEWMAT_INCLUDE_DIRS})
   include_directories(${GLUT_INCLUDE_DIR})
